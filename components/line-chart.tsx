@@ -1,7 +1,7 @@
 "use client";
 
 import { TrendingUp } from "lucide-react";
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis, Tooltip } from "recharts";
 
 import {
   Card,
@@ -18,50 +18,49 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-const chartData = [
-  { month: "January", desktop: 186 },
-  { month: "February", desktop: 305 },
-  { month: "March", desktop: 237 },
-  { month: "April", desktop: 73 },
-  { month: "May", desktop: 209 },
-  { month: "June", desktop: 214 },
-];
+// Define the props interface for LineChartComponent
+interface LineChartComponentProps {
+  data: any[]; // Expecting data prop as array of objects, refine type later if needed
+}
 
-const chartConfig = {
+const chartConfig = { // Keep chartConfig as it seems to be used for styling
   desktop: {
     label: "Desktop",
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig;
 
-export function LineChartComponent() {
+function LineChartComponent({ data }: LineChartComponentProps) { // Destructure data prop
+
+  // Use the data prop instead of hardcoded chartData
   return (
     <Card>
       <CardHeader>
         <CardTitle>Line Chart</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardDescription>Data from prop</CardDescription> {/* Updated Description */}
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
           <LineChart
             accessibilityLayer
-            data={chartData}
+            data={data} // Use data prop here
             margin={{ left: 12, right: 12 }}
           >
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="month" // Assuming data has 'month' property, adjust if needed
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => value?.toString().slice(0, 3)} // Safe slice as value can be undefined
             />
+            <YAxis /> {/* Added YAxis for completeness */}
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
             <Line
-              dataKey="desktop"
+              dataKey="desktop" // Assuming data has 'desktop' property, adjust if needed
               type="natural"
               stroke="var(--color-desktop)"
               strokeWidth={2}
@@ -72,10 +71,10 @@ export function LineChartComponent() {
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          Trending up by 5.2% this month <TrendingUp className="size-4" /> {/* Keep the footer part */}
         </div>
         <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
+          Showing total visitors for the last 6 months {/* Keep the footer part */}
         </div>
       </CardFooter>
     </Card>

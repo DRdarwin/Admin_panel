@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { PieChart } from "@/components/pie-chart";
 
 interface DataTableProps {
   data: { [key: string]: any }[];
@@ -32,38 +31,34 @@ export default function DataTable({ data, columns }: DataTableProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full border-collapse text-left">
-          <thead>
-            <tr className="bg-gray-100">
+    <div className="overflow-x-auto rounded-lg border">
+      <table className="w-full border-collapse text-left">
+        <thead>
+          <tr className="bg-gray-100">
+            {columns.map((col) => (
+              <th
+                key={col.key}
+                className="cursor-pointer px-4 py-2"
+                onClick={() => handleSort(col.key)}
+              >
+                {col.label}{" "}
+                {sortKey === col.key ? (sortOrder === "asc" ? "↑" : "↓") : ""}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {sortedData.map((row, rowIndex) => (
+            <tr key={rowIndex} className="border-t">
               {columns.map((col) => (
-                <th
-                  key={col.key}
-                  className="cursor-pointer px-4 py-2"
-                  onClick={() => handleSort(col.key)}
-                >
-                  {col.label} {sortKey === col.key ? (sortOrder === "asc" ? "↑" : "↓") : ""}
-                </th>
+                <td key={col.key} className="px-4 py-2">
+                  {row[col.key]}
+                </td>
               ))}
             </tr>
-          </thead>
-          <tbody>
-            {sortedData.map((row, rowIndex) => (
-              <tr key={rowIndex} className="border-t">
-                {columns.map((col) => (
-                  <td key={col.key} className="px-4 py-2">
-                    {row[col.key]}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <div className="rounded-lg border p-4">
-        <PieChart data={data} />
-      </div>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

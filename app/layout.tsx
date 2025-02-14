@@ -1,11 +1,11 @@
 import "@/styles/globals.css"
-import { metadata } from "@/app/layout-metadata";
 import { fontSans } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
+import { ClientHeader } from "@/components/client-header"
 import { SiteHeader } from "@/components/site-header"
 import { TailwindIndicator } from "@/components/tailwind-indicator"
 import { ThemeProvider } from "@/components/theme-provider"
-import { ClientHeader } from "@/components/client-header";
+import { metadata } from "@/app/layout-metadata"
 
 interface RootLayoutProps {
   children: React.ReactNode

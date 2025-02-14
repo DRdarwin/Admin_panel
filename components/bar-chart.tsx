@@ -1,10 +1,17 @@
-"use client";
+"use client"
 
-import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  Bar,
+  BarChart as RechartsBarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts"
 
 interface BarChartProps {
-  data: { name: string; value: number }[];
-  color?: string;
+  data: { name: string; value: number }[]
+  color?: string
 }
 
 export default function BarChart({ data, color = "#4F46E5" }: BarChartProps) {
@@ -19,5 +26,5 @@ export default function BarChart({ data, color = "#4F46E5" }: BarChartProps) {
         </RechartsBarChart>
       </ResponsiveContainer>
     </div>
-  );
+  )
 }

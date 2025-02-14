@@ -1,34 +1,34 @@
-"use client";
+"use client"
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react"
 
 interface DataTableProps {
-  data: { [key: string]: any }[];
-  columns: { key: string; label: string }[];
+  data: { [key: string]: any }[]
+  columns: { key: string; label: string }[]
 }
 
 export default function DataTable({ data, columns }: DataTableProps) {
-  const [sortKey, setSortKey] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortKey, setSortKey] = useState<string | null>(null)
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
 
   // Мемоізація відсортованих даних для оптимізації продуктивності
   const sortedData = useMemo(() => {
-    if (!sortKey) return data;
+    if (!sortKey) return data
     return [...data].sort((a, b) => {
-      if (a[sortKey] < b[sortKey]) return sortOrder === "asc" ? -1 : 1;
-      if (a[sortKey] > b[sortKey]) return sortOrder === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [data, sortKey, sortOrder]);
+      if (a[sortKey] < b[sortKey]) return sortOrder === "asc" ? -1 : 1
+      if (a[sortKey] > b[sortKey]) return sortOrder === "asc" ? 1 : -1
+      return 0
+    })
+  }, [data, sortKey, sortOrder])
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc")
     } else {
-      setSortKey(key);
-      setSortOrder("asc");
+      setSortKey(key)
+      setSortOrder("asc")
     }
-  };
+  }
 
   return (
     <div className="overflow-x-auto rounded-lg border">
@@ -60,5 +60,5 @@ export default function DataTable({ data, columns }: DataTableProps) {
         </tbody>
       </table>
     </div>
-  );
+  )
 }

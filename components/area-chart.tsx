@@ -1,14 +1,29 @@
-"use client";
+"use client"
 
-import { TrendingUp } from "lucide-react";
-import { Area, AreaChart, CartesianGrid, XAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer } from "@/components/ui/chart";
+import { TrendingUp } from "lucide-react"
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+} from "recharts"
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { ChartContainer } from "@/components/ui/chart"
 
 interface ChartData {
-  month: string;
-  desktop: number;
-  mobile: number;
+  month: string
+  desktop: number
+  mobile: number
 }
 
 const chartData: ChartData[] = [
@@ -18,13 +33,13 @@ const chartData: ChartData[] = [
   { month: "April", desktop: 73, mobile: 190 },
   { month: "May", desktop: 209, mobile: 130 },
   { month: "June", desktop: 214, mobile: 140 },
-];
+]
 
 interface ChartConfig {
   [key: string]: {
-    label: string;
-    color: string;
-  };
+    label: string
+    color: string
+  }
 }
 
 const chartConfig: ChartConfig = {
@@ -36,40 +51,49 @@ const chartConfig: ChartConfig = {
     label: "Mobile",
     color: "var(--chart-2)",
   },
-};
+}
 
 interface TooltipPayload {
-  name: string;
-  value: number;
+  name: string
+  value: number
 }
 
 interface CustomTooltipProps {
-  active?: boolean;
-  payload?: { name: string; value: number; }[];
-  label?: string | number;
+  active?: boolean
+  payload?: { name: string; value: number }[]
+  label?: string | number
 }
 
-const CustomTooltipContent = ({ active, payload, label }: CustomTooltipProps) => {
+const CustomTooltipContent = ({
+  active,
+  payload,
+  label,
+}: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     return (
       <div className="rounded bg-white p-2 shadow">
         {label && <p className="label font-medium">{label}</p>}
         {payload.map((item, index) => (
-          <p key={index} className="intro text-sm">{`${item.name}: ${item.value}`}</p>
+          <p
+            key={index}
+            className="intro text-sm"
+          >{`${item.name}: ${item.value}`}</p>
         ))}
       </div>
-    );
+    )
   }
 
-  return null;
-};
+  return null
+}
 
 export function Component(): JSX.Element {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Area Chart - Stacked</CardTitle>
-        <CardDescription>Showing total visitors for the last 6 months</CardDescription>
+        <CardDescription>
+          Showing total visitors for the last 6 months
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {chartData && chartData.length > 0 ? ( // Перевірка наявності даних
@@ -84,7 +108,10 @@ export function Component(): JSX.Element {
                   tickMargin={8}
                   tickFormatter={(value: string) => value.slice(0, 3)}
                 />
-                <Tooltip cursor={{ strokeDasharray: "3 3" }} content={<CustomTooltipContent />} />
+                <Tooltip
+                  cursor={{ strokeDasharray: "3 3" }}
+                  content={<CustomTooltipContent />}
+                />
                 <Area
                   dataKey="mobile"
                   type="monotone"
@@ -121,5 +148,5 @@ export function Component(): JSX.Element {
         </div>
       </CardFooter>
     </Card>
-  );
+  )
 }

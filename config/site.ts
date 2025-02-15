@@ -3,11 +3,15 @@ export type SiteConfig = typeof siteConfig
 export const siteConfig = {
   name: "Administrator's Panel",
   description:
-    "Beautifully designed components built with Radix UI and Tailwind CSS.",
+    "Flight Management Administrator Dashboard",
   mainNav: [
     {
       title: "Dashboard",
       href: "/",
+    },
+    {
+      title: "Mail",
+      href: "/mail",
     },
   ],
   links: {

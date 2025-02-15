@@ -1,165 +1,449 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { useState, useMemo } from "react";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { SidebarLeft } from "@/components/sidebar-left";
 import { SidebarRight } from "@/components/sidebar-right";
-import { Menubar } from "@/components/ui/menubar";
 import { Card, CardContent } from "@/components/ui/card";
-import DataTable from "@/components/data-table";
-import BarChart from "@/components/bar-chart"; // Assuming BarChart expects 'data' prop
-import LineChart from "@/components/line-chart"; // Assuming LineChart expects 'data' prop
-// import { Progress } from "@/components/ui/progress";
-import Link from "next/link";
+import BarChart from "@/components/bar-chart";
+import LineChart from "@/components/line-chart";
+import { Menubar } from "@/components/ui/menubar";
+import { subDays, format, parseISO } from "date-fns";
 
-export default function Page() {
-  const [flights, setFlights] = useState<any[] | undefined>();
-  const [transactions, setTransactions] = useState<any[] | undefined>();
-  const [users, setUsers] = useState<any[] | undefined>();
+// TanStack React Table imports
+import * as React from "react";
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  getFilteredRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 
-  // Move useMemo hooks before the conditional return
-  const financeSummary = useMemo(() => {
-    const totalRevenue = (transactions || []).filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
-    return { totalRevenue };
-  }, [transactions]);
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-  const flightSummary = useMemo(() => {
-    const passengers = (flights || []).reduce((sum, flight) => sum + (flight.passengers || 0), 0);
-    const flightHours = (flights || []).reduce((sum, flight) => sum + (flight.hours || 0), 0);
-    const flightsPerformed = (flights || []).length;
-    return { passengers, flightHours, flightsPerformed };
-  }, [flights]);
-
-  // Define columns for DataTable - assuming flight data structure - MOVE BEFORE CONDITIONAL RETURN
-  const columns = useMemo(() => [
-    {
-      label: 'Flight ID', // Changed header to label
-      key: 'id',      // Changed accessorKey to key
-    },
-    {
-      label: 'Departure', // Changed header to label
-      key: 'departure', // Changed accessorKey to key
-    },
-    {
-      label: 'Arrival',  // Changed header to label
-      key: 'arrival',   // Changed accessorKey to key
-    },
-    {
-      label: 'Hours',   // Changed header to label
-      key: 'hours',     // Changed accessorKey to key
-    },
-    {
-      label: 'Passengers', // Changed header to label
-      key: 'passengers',// Changed accessorKey to key
-    },
-    // Add more columns as needed based on your flight data structure
-  ], []);
-
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const flightsRes = await fetch("/admin/flights/raw");
-        setFlights(await flightsRes.json());
-
-        const transactionsRes = await fetch("/admin/finance/raw");
-        setTransactions(await transactionsRes.json());
-
-        const usersRes = await fetch("/admin/users/raw");
-        setUsers(await usersRes.json());
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
+// Генератор випадкових чисел для тестових даних (для графіків)
+const generateMonthlyData = (referenceDate: Date) => {
+  return Array.from({ length: 30 }, (_, i) => {
+    const date = subDays(referenceDate, i);
+    return {
+      name: format(date, "MMM d"),
+      revenue: Math.floor(Math.random() * 20000 + 5000),
+      passengers: Math.floor(Math.random() * 300 + 50),
+      flightHours: Math.floor(Math.random() * 100 + 10),
+      date: format(date, "yyyy-MM-dd"),
     };
-    fetchData();
-  }, []);
+  }).reverse();
+};
 
-  if (flights === undefined || transactions === undefined || users === undefined) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        {/* <Progress value={50} className="w-3/5" /> */}
-      </div>
-    );
-  }
+const pilotNames = [
+  "John Doe",
+  "Jane Smith",
+  "Michael Johnson",
+  "Emily Davis",
+  "Chris Brown",
+  "Laura Wilson",
+  "Daniel Miller",
+  "Sarah Taylor",
+];
 
+const aircraftTypes = ["Boeing 737", "Airbus A320", "Embraer 175", "Cessna 208", "Boeing 787"];
+
+// Тестові дані для таблиці (15 рядків)
+// Додаємо "id" для сумісності з танстек-таблицею
+// "id" – умовний, щоб можна було копіювати щось у меню
+function getRandomPilot() {
+  return pilotNames[Math.floor(Math.random() * pilotNames.length)];
+}
+function getRandomAircraftType() {
+  return aircraftTypes[Math.floor(Math.random() * aircraftTypes.length)];
+}
+
+const generatedFlightData = Array.from({ length: 15 }, (_, i) => {
+  const date = subDays(new Date(), i);
+  return {
+    id: (i + 1).toString(),
+    date: format(date, "yyyy-MM-dd"),
+    totalRevenue: Math.floor(Math.random() * 20000 + 5000),
+    passengers: Math.floor(Math.random() * 300 + 50),
+    flightHours: Math.floor(Math.random() * 100 + 10),
+    // Нові поля:
+    aircraftReg: `N${Math.floor(Math.random() * 900 + 100)}`,
+    pilot: getRandomPilot(),
+    aircraftType: getRandomAircraftType(),
+    aircraftCapacity: Math.floor(Math.random() * 200 + 80),
+  };
+});
+
+// Визначимо тип для рядка таблиці
+export type FlightData = {
+  id: string;
+  date: string;
+  totalRevenue: number;
+  passengers: number;
+  flightHours: number;
+  aircraftReg: string;
+  pilot: string;
+  aircraftType: string;
+  aircraftCapacity: number;
+};
+
+// Описуємо колонки для TanStack React Table
+export const columns: ColumnDef<FlightData>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "date",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Date
+          <ArrowUpDown className="ml-1 size-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      return <span>{row.getValue("date") as string}</span>;
+    },
+  },
+  {
+    accessorKey: "aircraftReg",
+    header: "Aircraft Reg.",
+    cell: ({ row }) => {
+      return <span>{row.getValue("aircraftReg") as string}</span>;
+    },
+  },
+  {
+    accessorKey: "pilot",
+    header: "Pilot",
+    cell: ({ row }) => {
+      return <span>{row.getValue("pilot") as string}</span>;
+    },
+  },
+  {
+    accessorKey: "aircraftType",
+    header: "Aircraft Type",
+    cell: ({ row }) => {
+      return <span>{row.getValue("aircraftType") as string}</span>;
+    },
+  },
+  {
+    accessorKey: "aircraftCapacity",
+    header: () => <div className="text-right">Aircraft Capacity</div>,
+    cell: ({ row }) => {
+      const val = row.getValue("aircraftCapacity") as number;
+      return <div className="text-right">{val}</div>;
+    },
+  },
+  {
+    accessorKey: "totalRevenue",
+    header: () => <div className="text-right">Revenue</div>,
+    cell: ({ row }) => {
+      const val = row.getValue("totalRevenue") as number;
+      const formatted = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      }).format(val);
+      return <div className="text-right font-medium">{formatted}</div>;
+    },
+  },
+  {
+    accessorKey: "passengers",
+    header: () => <div className="text-right">Passengers</div>,
+    cell: ({ row }) => {
+      const val = row.getValue("passengers") as number;
+      return <div className="text-right">{val}</div>;
+    },
+  },
+  {
+    accessorKey: "flightHours",
+    header: () => <div className="text-right">Flight Hours</div>,
+    cell: ({ row }) => {
+      const val = row.getValue("flightHours") as number;
+      return <div className="text-right">{val}</div>;
+    },
+  },
+  {
+    id: "actions",
+    enableHiding: false,
+    cell: ({ row }) => {
+      const flight = row.original;
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="size-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() => navigator.clipboard.writeText(flight.id)}
+            >
+              Copy Flight ID
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>View Flight</DropdownMenuItem>
+            <DropdownMenuItem>View Details</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
+  },
+];
+
+function DataTableTanstack() {
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = React.useState({});
+
+  const table = useReactTable({
+    data: generatedFlightData,
+    columns,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
+  });
 
   return (
-    <SidebarProvider>
-      <SidebarLeft />
-      <SidebarInset>
-        <header className="sticky top-0 flex h-14 shrink-0 items-center gap-2 bg-background">
-          <div className="flex flex-1 items-center gap-2 px-3">
-            <SidebarTrigger />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbPage className="line-clamp-1">Admin Dashboard</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-        </header>
-        <Menubar />
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-sm text-gray-400">Total Revenue</h2>
-                <p className="text-3xl font-bold">${financeSummary.totalRevenue.toFixed(2)}</p>
-                <p className="text-sm text-gray-500">+20.1% from last month</p>
-                <LineChart data={transactions} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-sm text-gray-400">Passengers</h2>
-                <p className="text-3xl font-bold">+{flightSummary.passengers}</p>
-                <p className="text-sm text-gray-500">+180.1% from last month</p>
-                <BarChart data={flights} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-sm text-gray-400">Flight Hours</h2>
-                <p className="text-3xl font-bold">+{flightSummary.flightHours}</p>
-                <p className="text-sm text-gray-500">+19% from last month</p>
-                <LineChart data={flights} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-sm text-gray-400">Flights Performed</h2>
-                <p className="text-3xl font-bold">+{flightSummary.flightsPerformed}</p>
-                <p className="text-sm text-gray-500">+201 since last hour</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-sm text-gray-400">Overview</h2>
-                <BarChart data={transactions} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-sm text-gray-400">Recent Flights</h2>
-                <p className="text-sm text-gray-500">You made {flights.length} flights this month.</p>
-                <DataTable data={flights} columns={columns} />
-              </CardContent>
-            </Card>
-          </div>
+    <div className="w-full">
+      <div className="flex items-center py-4">
+        <Input
+          placeholder="Filter date..."
+          value={(table.getColumn("date")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("date")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              Columns <ChevronDown className="ml-1 size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="flex-1 text-sm text-muted-foreground">
+          {table.getFilteredSelectedRowModel().rows.length} of {" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
         </div>
-      </SidebarInset>
-      <SidebarRight />
-    </SidebarProvider>
+        <div className="space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Page() {
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const referenceDate = useMemo(
+    () => (selectedDate ? parseISO(selectedDate) : new Date()),
+    [selectedDate]
+  );
+  const monthlyData = useMemo(() => generateMonthlyData(referenceDate), [referenceDate]);
+
+  return (
+    <div className="flex text-xs">
+      <SidebarProvider>
+        <SidebarLeft />
+        <div className="flex-1">
+          <Menubar />
+          <SidebarInset>
+            <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <Card>
+                  <CardContent className="p-4">
+                    <h2 className="text-xs text-gray-400">Total Revenue</h2>
+                    <p className="text-2xl font-bold">
+                      ${monthlyData.reduce((sum, d) => sum + d.revenue, 0).toLocaleString()}
+                    </p>
+                    <LineChart
+                      data={monthlyData.map((d) => ({ name: d.name, value: d.revenue }))}
+                    />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <h2 className="text-xs text-gray-400">Passengers</h2>
+                    <p className="text-2xl font-bold">
+                      {monthlyData.reduce((sum, d) => sum + d.passengers, 0)}
+                    </p>
+                    <BarChart
+                      data={monthlyData.map((d) => ({ name: d.name, value: d.passengers }))}
+                    />
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4">
+                    <h2 className="text-xs text-gray-400">Flight Hours</h2>
+                    <p className="text-2xl font-bold">
+                      {monthlyData.reduce((sum, d) => sum + d.flightHours, 0)}
+                    </p>
+                    <LineChart
+                      data={monthlyData.map((d) => ({ name: d.name, value: d.flightHours }))}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Демонстраційна таблиця TanStack React Table */}
+              <div className="mt-6 rounded-lg bg-card p-4 text-card-foreground shadow-lg">
+                <h2 className="mb-4 text-lg font-semibold">Recent Flights (Advanced DataTable)</h2>
+                <DataTableTanstack />
+              </div>
+            </div>
+          </SidebarInset>
+        </div>
+        <SidebarRight onDateSelect={setSelectedDate} />
+      </SidebarProvider>
+    </div>
   );
 }

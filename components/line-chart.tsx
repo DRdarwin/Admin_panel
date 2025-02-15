@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { TrendingUp } from "lucide-react";
-import { CartesianGrid, Line, LineChart, XAxis, YAxis, Tooltip } from "recharts";
+import { TrendingUp } from "lucide-react"
+import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from "recharts"
 
 import {
   Card,
@@ -10,34 +10,37 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/card"
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart";
+} from "@/components/ui/chart"
 
 // Define the props interface for LineChartComponent
 interface LineChartComponentProps {
-  data: any[]; // Expecting data prop as array of objects, refine type later if needed
+  data: any[] // Expecting data prop as array of objects, refine type later if needed
 }
 
-const chartConfig = { // Keep chartConfig as it seems to be used for styling
+const chartConfig = {
+  // Keep chartConfig as it seems to be used for styling
   desktop: {
     label: "Desktop",
     color: "hsl(var(--chart-1))",
   },
-} satisfies ChartConfig;
+} satisfies ChartConfig
 
-function LineChartComponent({ data }: LineChartComponentProps) { // Destructure data prop
+function LineChartComponent({ data }: LineChartComponentProps) {
+  // Destructure data prop
 
   // Use the data prop instead of hardcoded chartData
   return (
     <Card>
       <CardHeader>
         <CardTitle>Line Chart</CardTitle>
-        <CardDescription>Data from prop</CardDescription> {/* Updated Description */}
+        <CardDescription>Data from prop</CardDescription>{" "}
+        {/* Updated Description */}
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
@@ -71,14 +74,16 @@ function LineChartComponent({ data }: LineChartComponentProps) { // Destructure 
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="size-4" /> {/* Keep the footer part */}
+          Trending up by 5.2% this month <TrendingUp className="size-4" />{" "}
+          {/* Keep the footer part */}
         </div>
         <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months {/* Keep the footer part */}
+          Showing total visitors for the last 6 months{" "}
+          {/* Keep the footer part */}
         </div>
       </CardFooter>
     </Card>
-  );
+  )
 }
 
-export default LineChartComponent;
+export default LineChartComponent

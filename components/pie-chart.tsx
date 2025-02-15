@@ -58,7 +58,7 @@ interface PieChartProps {
 }
 
 export const PieChart: React.FC<PieChartProps> = ({ data }) => {
-  return <div>Pie Chart</div>;
-};
+  return <div>Pie Chart</div>
+}
 
 export default PieChart

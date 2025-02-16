@@ -1,4 +1,8 @@
+"use client"
+
 import Link from "next/link"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 
 import { siteConfig } from "@/config/site"
 import { buttonVariants } from "@/components/ui/button"
@@ -7,6 +11,23 @@ import { MainNav } from "@/components/main-nav"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 export function SiteHeader() {
+  const router = useRouter()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    // Перевіряємо наявність токена
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("authToken")
+      setIsAuthenticated(!!token)
+    }
+  }, [])
+
+  const handleLogout = () => {
+    // Видаляємо токен та перенаправляємо на /login
+    localStorage.removeItem("authToken")
+    router.push("/login")
+  }
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
@@ -44,6 +65,18 @@ export function SiteHeader() {
               </div>
             </Link>
             <ThemeToggle />
+            {/* Кнопка Logout якщо авторизовані */}
+            {isAuthenticated && (
+              <button
+                onClick={handleLogout}
+                className={buttonVariants({
+                  size: "sm",
+                  variant: "ghost",
+                })}
+              >
+                Logout
+              </button>
+            )}
           </nav>
         </div>
       </div>

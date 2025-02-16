@@ -1,5 +1,5 @@
-import { GalleryVerticalEnd } from "lucide-react"
 import Image from "next/image"
+import { GalleryVerticalEnd } from "lucide-react"
 
 import { LoginForm } from "@/components/login-form"
 

@@ -1,13 +1,21 @@
-import { GalleryVerticalEnd } from "lucide-react"
+'use client'
 
-import { LoginForm } from "@/components/login-form"
-import { LoginHeader } from "@/components/login-header"
+import { useRouter } from 'next/navigation'
+import { LoginForm } from '@/components/login-form'
+import { LoginHeader } from '@/components/login-header'
+import { GalleryVerticalEnd } from 'lucide-react'
 
 export default function LoginPage() {
+  const router = useRouter()
+
+  const handleLoginSuccess = () => {
+    router.push('/')
+  }
+
   return (
     <>
       <LoginHeader />
-      <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-muted p-6">
         <div className="flex w-full max-w-sm flex-col gap-6">
           <a
             href="#"
@@ -18,7 +26,7 @@ export default function LoginPage() {
             </div>
             Admin Panel
           </a>
-          <LoginForm dataPath="/data/admin.json" />
+          <LoginForm onSuccess={handleLoginSuccess} />
         </div>
       </div>
     </>

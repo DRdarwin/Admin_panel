@@ -73,12 +73,12 @@ const data = {
   navSecondary: [
     {
       title: "Calendar",
-      url: "#",
+      url: "/calendar",
       icon: Calendar,
     },
     {
       title: "Settings",
-      url: "#",
+      url: "/settings",
       icon: Settings2,
     },
     {

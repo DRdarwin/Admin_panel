@@ -1,13 +1,36 @@
-"use client";
+"use client"
 
-import { useState, useMemo } from "react";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { SidebarLeft } from "@/components/sidebar-left";
-import { SidebarRight } from "@/components/sidebar-right";
-import { Card, CardContent } from "@/components/ui/card";
-import BarChart from "@/components/bar-chart";
-import LineChart from "@/components/line-chart";
+import { useMemo, useState } from "react"
+// TanStack React Table imports
+import * as React from "react"
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table"
+import { format, parseISO, subDays } from "date-fns"
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
 
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Input } from "@/components/ui/input"
 // Імпорти для Menubar
 import {
   Menubar,
@@ -23,38 +46,8 @@ import {
   MenubarSubContent,
   MenubarSubTrigger,
   MenubarTrigger,
-} from "@/components/ui/menubar";
-
-import { subDays, format, parseISO } from "date-fns";
-
-// TanStack React Table imports
-import * as React from "react";
-import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui/menubar"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import {
   Table,
   TableBody,
@@ -62,14 +55,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
+import BarChart from "@/components/bar-chart"
+import LineChart from "@/components/line-chart"
+import { SidebarLeft } from "@/components/sidebar-left"
+import { SidebarRight } from "@/components/sidebar-right"
 
 // =====================
 // 1) Генератор випадкових даних (з flights):
 // =====================
 const generateMonthlyData = (referenceDate: Date) => {
   return Array.from({ length: 30 }, (_, i) => {
-    const date = subDays(referenceDate, i);
+    const date = subDays(referenceDate, i)
     return {
       name: format(date, "MMM d"),
       revenue: Math.floor(Math.random() * 20000 + 5000),
@@ -77,9 +74,9 @@ const generateMonthlyData = (referenceDate: Date) => {
       flightHours: Math.floor(Math.random() * 100 + 10),
       flights: Math.floor(Math.random() * 10 + 1), // Додаємо виконані рейси
       date: format(date, "yyyy-MM-dd"),
-    };
-  }).reverse();
-};
+    }
+  }).reverse()
+}
 
 const pilotNames = [
   "John Doe",
@@ -90,20 +87,26 @@ const pilotNames = [
   "Laura Wilson",
   "Daniel Miller",
   "Sarah Taylor",
-];
+]
 
-const aircraftTypes = ["Boeing 737", "Airbus A320", "Embraer 175", "Cessna 208", "Boeing 787"];
+const aircraftTypes = [
+  "Boeing 737",
+  "Airbus A320",
+  "Embraer 175",
+  "Cessna 208",
+  "Boeing 787",
+]
 
 function getRandomPilot() {
-  return pilotNames[Math.floor(Math.random() * pilotNames.length)];
+  return pilotNames[Math.floor(Math.random() * pilotNames.length)]
 }
 function getRandomAircraftType() {
-  return aircraftTypes[Math.floor(Math.random() * aircraftTypes.length)];
+  return aircraftTypes[Math.floor(Math.random() * aircraftTypes.length)]
 }
 
 // Тестові дані для таблиці (15 рядків)
 const generatedFlightData = Array.from({ length: 15 }, (_, i) => {
-  const date = subDays(new Date(), i);
+  const date = subDays(new Date(), i)
   return {
     id: (i + 1).toString(),
     date: format(date, "yyyy-MM-dd"),
@@ -114,23 +117,23 @@ const generatedFlightData = Array.from({ length: 15 }, (_, i) => {
     pilot: getRandomPilot(),
     aircraftType: getRandomAircraftType(),
     aircraftCapacity: Math.floor(Math.random() * 200 + 80),
-  };
-});
+  }
+})
 
 // =====================
 // 2) Тип для рядка таблиці + колонки:
 // =====================
 export type FlightData = {
-  id: string;
-  date: string;
-  totalRevenue: number;
-  passengers: number;
-  flightHours: number;
-  aircraftReg: string;
-  pilot: string;
-  aircraftType: string;
-  aircraftCapacity: number;
-};
+  id: string
+  date: string
+  totalRevenue: number
+  passengers: number
+  flightHours: number
+  aircraftReg: string
+  pilot: string
+  aircraftType: string
+  aircraftCapacity: number
+}
 
 export const columns: ColumnDef<FlightData>[] = [
   {
@@ -166,74 +169,74 @@ export const columns: ColumnDef<FlightData>[] = [
           Date
           <ArrowUpDown className="ml-1 size-4" />
         </Button>
-      );
+      )
     },
     cell: ({ row }) => {
-      return <span>{row.getValue("date") as string}</span>;
+      return <span>{row.getValue("date") as string}</span>
     },
   },
   {
     accessorKey: "aircraftReg",
     header: "Aircraft Reg.",
     cell: ({ row }) => {
-      return <span>{row.getValue("aircraftReg") as string}</span>;
+      return <span>{row.getValue("aircraftReg") as string}</span>
     },
   },
   {
     accessorKey: "pilot",
     header: "Pilot",
     cell: ({ row }) => {
-      return <span>{row.getValue("pilot") as string}</span>;
+      return <span>{row.getValue("pilot") as string}</span>
     },
   },
   {
     accessorKey: "aircraftType",
     header: "Aircraft Type",
     cell: ({ row }) => {
-      return <span>{row.getValue("aircraftType") as string}</span>;
+      return <span>{row.getValue("aircraftType") as string}</span>
     },
   },
   {
     accessorKey: "aircraftCapacity",
     header: () => <div className="text-right">Aircraft Capacity</div>,
     cell: ({ row }) => {
-      const val = row.getValue("aircraftCapacity") as number;
-      return <div className="text-right">{val}</div>;
+      const val = row.getValue("aircraftCapacity") as number
+      return <div className="text-right">{val}</div>
     },
   },
   {
     accessorKey: "totalRevenue",
     header: () => <div className="text-right">Revenue</div>,
     cell: ({ row }) => {
-      const val = row.getValue("totalRevenue") as number;
+      const val = row.getValue("totalRevenue") as number
       const formatted = new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
-      }).format(val);
-      return <div className="text-right font-medium">{formatted}</div>;
+      }).format(val)
+      return <div className="text-right font-medium">{formatted}</div>
     },
   },
   {
     accessorKey: "passengers",
     header: () => <div className="text-right">Passengers</div>,
     cell: ({ row }) => {
-      const val = row.getValue("passengers") as number;
-      return <div className="text-right">{val}</div>;
+      const val = row.getValue("passengers") as number
+      return <div className="text-right">{val}</div>
     },
   },
   {
     accessorKey: "flightHours",
     header: () => <div className="text-right">Flight Hours</div>,
     cell: ({ row }) => {
-      const val = row.getValue("flightHours") as number;
-      return <div className="text-right">{val}</div>;
+      const val = row.getValue("flightHours") as number
+      return <div className="text-right">{val}</div>
     },
   },
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const flight = row.original;
+      const flight = row.original
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -254,19 +257,22 @@ export const columns: ColumnDef<FlightData>[] = [
             <DropdownMenuItem>View Details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      );
+      )
     },
   },
-];
+]
 
 // =====================
 // 3) Компонент DataTableTanstack:
 // =====================
 function DataTableTanstack() {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  )
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = React.useState({})
 
   const table = useReactTable({
     data: generatedFlightData,
@@ -285,7 +291,7 @@ function DataTableTanstack() {
       columnVisibility,
       rowSelection,
     },
-  });
+  })
 
   return (
     <div className="w-full">
@@ -314,11 +320,13 @@ function DataTableTanstack() {
                     key={column.id}
                     className="capitalize"
                     checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
-                );
+                )
               })}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -338,7 +346,7 @@ function DataTableTanstack() {
                             header.getContext()
                           )}
                     </TableHead>
-                  );
+                  )
                 })}
               </TableRow>
             ))}
@@ -352,14 +360,20 @@ function DataTableTanstack() {
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>
@@ -392,7 +406,7 @@ function DataTableTanstack() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 // =====================
@@ -491,29 +505,34 @@ function MenubarDemo() {
         </MenubarContent>
       </MenubarMenu>
     </Menubar>
-  );
+  )
 }
 
 // =====================
 // 5) Основний компонент Page:
 // =====================
 export default function Page() {
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
   // referenceDate залежить від вибраної дати або сьогоднішньої
   const referenceDate = useMemo(
     () => (selectedDate ? parseISO(selectedDate) : new Date()),
     [selectedDate]
-  );
+  )
 
   // Місячні дані (30 днів), включно з flights
-  const monthlyData = useMemo(() => generateMonthlyData(referenceDate), [referenceDate]);
+  const monthlyData = useMemo(
+    () => generateMonthlyData(referenceDate),
+    [referenceDate]
+  )
 
   // Знаходимо кількість рейсів за вибраний день
   const flightsForSelectedDay = useMemo(() => {
-    const found = monthlyData.find((d) => d.date === format(referenceDate, "yyyy-MM-dd"));
-    return found ? found.flights : 0;
-  }, [monthlyData, referenceDate]);
+    const found = monthlyData.find(
+      (d) => d.date === format(referenceDate, "yyyy-MM-dd")
+    )
+    return found ? found.flights : 0
+  }, [monthlyData, referenceDate])
 
   return (
     <div className="flex text-xs">
@@ -538,7 +557,10 @@ export default function Page() {
                         .toLocaleString()}
                     </p>
                     <LineChart
-                      data={monthlyData.map((d) => ({ name: d.name, value: d.revenue }))}
+                      data={monthlyData.map((d) => ({
+                        name: d.name,
+                        value: d.revenue,
+                      }))}
                     />
                   </CardContent>
                 </Card>
@@ -547,9 +569,14 @@ export default function Page() {
                 <Card className="h-4/5">
                   <CardContent className="p-4">
                     <h2 className="text-xs text-gray-400">Completed Flights</h2>
-                    <p className="text-2xl font-bold">{flightsForSelectedDay}</p>
+                    <p className="text-2xl font-bold">
+                      {flightsForSelectedDay}
+                    </p>
                     <LineChart
-                      data={monthlyData.map((d) => ({ name: d.name, value: d.flights }))}
+                      data={monthlyData.map((d) => ({
+                        name: d.name,
+                        value: d.flights,
+                      }))}
                     />
                   </CardContent>
                 </Card>
@@ -562,7 +589,10 @@ export default function Page() {
                       {monthlyData.reduce((sum, d) => sum + d.flightHours, 0)}
                     </p>
                     <LineChart
-                      data={monthlyData.map((d) => ({ name: d.name, value: d.flightHours }))}
+                      data={monthlyData.map((d) => ({
+                        name: d.name,
+                        value: d.flightHours,
+                      }))}
                     />
                   </CardContent>
                 </Card>
@@ -581,5 +611,5 @@ export default function Page() {
         <SidebarRight onDateSelect={setSelectedDate} />
       </SidebarProvider>
     </div>
-  );
+  )
 }

@@ -30,6 +30,6 @@ const DataTable = ({ columns, data }: DataTableProps) => (
       ))}
     </tbody>
   </table>
-);
+)
 
-export default DataTable;
+export default DataTable

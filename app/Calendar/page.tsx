@@ -12,7 +12,16 @@ import {
 } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 
-export default function Page() {
+export const metadata = {
+  title: "Calendar",
+  description: "This is the calendar page",
+}
+
+export const viewport = {
+  themeColor: "#ffffff", // Правильное место для themeColor
+}
+
+export default function CalendarPage() {
   return (
     <SidebarProvider>
       <AppSidebar />

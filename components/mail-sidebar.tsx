@@ -3,7 +3,6 @@
 import * as React from "react"
 import { ArchiveX, Command, File, Inbox, Send, Trash2 } from "lucide-react"
 
-import { NavUser } from "@/components/nav-user"
 import { Label } from "@/components/ui/label"
 import {
   Sidebar,
@@ -19,6 +18,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Switch } from "@/components/ui/switch"
+import { NavUser } from "@/components/nav-user"
 
 // This is sample data
 const data = {

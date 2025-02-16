@@ -1,4 +1,6 @@
 {
-  "email": "admin@example.com",
-  "passwordHash": "$2b$10$VJvG9WQpMZcJf9z1X3MlYObW/3.QH.TFCvL4HHz3pA6J/Yy8Xh3lG"
+  "admin": {
+    "email": "admin@example.com",
+    "password": "admin123"
+  }
 }

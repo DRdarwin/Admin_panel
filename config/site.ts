@@ -2,8 +2,7 @@ export type SiteConfig = typeof siteConfig
 
 export const siteConfig = {
   name: "Administrator's Panel",
-  description:
-    "Flight Management Administrator Dashboard",
+  description: "Flight Management Administrator Dashboard",
   mainNav: [
     {
       title: "Dashboard",

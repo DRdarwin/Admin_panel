@@ -12,7 +12,7 @@ export const Icons = {
   moon: Moon,
   twitter: Twitter,
   logo: (props: LucideProps) => (
-    <svg xlink="http://www.w3.org/1999/xlink" viewBox="0 0 496 496" {...props}>
+    <svg viewBox="0 0 496 496" {...props}>
       <path
         fill="#000000"
         opacity="1.000000"

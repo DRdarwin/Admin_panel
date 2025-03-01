@@ -1,6 +1,8 @@
 "use client"
+
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useState, useEffect } from "react"
+
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,7 +21,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   useEffect(() => {
     setTimeout(() => {
       document.getElementById("email")?.setAttribute("autocomplete", "username")
-      document.getElementById("password")?.setAttribute("autocomplete", "current-password")
+      document
+        .getElementById("password")
+        ?.setAttribute("autocomplete", "current-password")
     }, 100)
   }, [])
 
@@ -30,7 +34,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       })
 
       const data = await res.json()
@@ -47,7 +51,11 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   }
 
   return (
-    <form className={cn("flex flex-col gap-6")} onSubmit={handleSubmit} autoComplete="on">
+    <form
+      className={cn("flex flex-col gap-6")}
+      onSubmit={handleSubmit}
+      autoComplete="on"
+    >
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Login to your account</h1>
         <p className="text-balance text-sm text-muted-foreground">
@@ -92,7 +100,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           Login
         </Button>
       </div>
-      {errorMessage && <p className="text-center text-red-500">{errorMessage}</p>}
+      {errorMessage && (
+        <p className="text-center text-red-500">{errorMessage}</p>
+      )}
     </form>
   )
 }

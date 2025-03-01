@@ -56,7 +56,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import BarChart from "@/components/bar-chart"
 import LineChart from "@/components/line-chart"
 import { SidebarLeft } from "@/components/sidebar-left"
 import { SidebarRight } from "@/components/sidebar-right"
@@ -135,7 +134,7 @@ export type FlightData = {
   aircraftCapacity: number
 }
 
-export const columns: ColumnDef<FlightData>[] = [
+const columns: ColumnDef<FlightData>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -172,28 +171,28 @@ export const columns: ColumnDef<FlightData>[] = [
       )
     },
     cell: ({ row }) => {
-      return <span>{row.getValue("date") as string}</span>
+      return <span>{row.getValue("date")}</span>
     },
   },
   {
     accessorKey: "aircraftReg",
     header: "Aircraft Reg.",
     cell: ({ row }) => {
-      return <span>{row.getValue("aircraftReg") as string}</span>
+      return <span>{row.getValue("aircraftReg")}</span>
     },
   },
   {
     accessorKey: "pilot",
     header: "Pilot",
     cell: ({ row }) => {
-      return <span>{row.getValue("pilot") as string}</span>
+      return <span>{row.getValue("pilot")}</span>
     },
   },
   {
     accessorKey: "aircraftType",
     header: "Aircraft Type",
     cell: ({ row }) => {
-      return <span>{row.getValue("aircraftType") as string}</span>
+      return <span>{row.getValue("aircraftType")}</span>
     },
   },
   {
